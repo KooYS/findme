@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: com.apollographql.apollo:apollo-android-support:0.3.2@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/apollo-android-support-0.3.2.aar/14546a687d831b023bc01bbac34e12b4/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/apollo-android-support-0.3.2.aar/14546a687d831b023bc01bbac34e12b4/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.apollographql.apollo/apollo-android-support/0.3.2/8489e177051a99e30acf5d15e07e28a4cc043846/apollo-android-support-0.3.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.apollographql.apollo/apollo-android-support/0.3.2/e7ce00a1f8d75c26928475dda965fe85d209de41/apollo-android-support-0.3.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
