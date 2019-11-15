@@ -2,6 +2,7 @@ package kr.koo.findme;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -117,6 +118,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     LinearLayout nfc_read;
     LinearLayout nfc_message;
     LinearLayout nfc_home;
+    ConstraintLayout nfc_acquisition_report;
+    ConstraintLayout nfc_lost_report;
 
 
     // nfc_message 사용 변수
@@ -204,6 +207,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         nfc_read.setVisibility(View.GONE);
         nfc_message.setVisibility(View.GONE);
         nfc_home.setVisibility(View.GONE);
+        nfc_acquisition_report.setVisibility(View.GONE);
+        nfc_lost_report.setVisibility(View.GONE);
 
 
         Fragment fragment = null;
@@ -225,9 +230,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_loss_report) {
             fragment = new LossFragment();
             title = "THE LOSS REPORT";
+            nfc_acquisition_report.setVisibility(View.VISIBLE);
         } else if (id == R.id.nav_acquisition_report) {
             fragment = new AcquisitionFragment();
             title = "THE ACQUISITION REPORT";
+            nfc_lost_report.setVisibility(View.VISIBLE);
+
         } else if (id == R.id.nav_message) {
             fragment = new MessageFragment();
             title = "MESSAGE";
@@ -256,6 +264,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         nfc_read = (LinearLayout) findViewById(R.id.nfc_read);                 // nfc 등록 xml
         nfc_message = (LinearLayout) findViewById(R.id.nfc_message);           // nfc 등록 xml
         nfc_home = (LinearLayout) findViewById(R.id.nfc_home);                 // nfc 등록 xml
+        nfc_acquisition_report = (ConstraintLayout) findViewById(R.id.acquisition_report);                 // nfc 등록 xml
+        nfc_lost_report = (ConstraintLayout) findViewById(R.id.lost_report);                 // nfc 등록 xml
     }
 
 

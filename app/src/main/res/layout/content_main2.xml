@@ -40,4 +40,16 @@
         android:layout_height="match_parent" />
 
 
+    <include
+        layout="@layout/nfc_acquisition_report"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+    <include
+        layout="@layout/nfc_lost_report"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
