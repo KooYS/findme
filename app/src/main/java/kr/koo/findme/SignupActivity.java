@@ -1,5 +1,6 @@
 package kr.koo.findme;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import kr.koo.findme.type.UserCreateInput;
 import okhttp3.OkHttpClient;
@@ -20,6 +21,10 @@ import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.api.Input;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +33,7 @@ import javax.annotation.Nonnull;
 public class SignupActivity extends AppCompatActivity {
 
     private  static ApolloClient myApollo;
-
+    String token;
 
     public  static ApolloClient getMyApollo(){
         myApollo = ApolloClient.builder()
@@ -45,10 +50,43 @@ public class SignupActivity extends AppCompatActivity {
         return myApollo;
     }
 
+    //                FirebaseInstanceId.getInstance().getInstanceId()
+//                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+//@Override
+//public void onComplete(@NonNull Task<InstanceIdResult> task) {
+//        if (!task.isSuccessful()) {
+//        Log.w(TAG, "getInstanceId failed", task.getException());
+//        return;
+//        }
+//
+//        // Get new Instance ID token
+//        String token = task.getResult().getToken();
+//
+//        // Log and toast
+//        String msg = getString(R.string.msg_token_fmt, token);
+//        Log.d(TAG, msg);
+//        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+//        }
+//        });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("getInstanceId", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        token = task.getResult().getToken();
+                    }
+                });
 
 
         final EditText edit_id = (EditText) findViewById(R.id.id);
@@ -99,7 +137,9 @@ public class SignupActivity extends AppCompatActivity {
                                 .name(edit_name.getText().toString())
                                 .birthday(edit_birth.getText().toString())
                                 .address(edit_addr.getText().toString())
-                                .phonenumber(edit_phone.getText().toString()).build())
+                                .phonenumber(edit_phone.getText().toString())
+                                .token(token).build()
+                        )
                         .build();
 
                 getMyApollo()

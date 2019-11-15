@@ -15,11 +15,10 @@ import kr.koo.findme.card.CardItem;
 import kr.koo.findme.card.CardPagerAdapter;
 import kr.koo.findme.card.ShadowTransformer;
 import kr.koo.findme.lib.MyBitmap;
-import kr.koo.findme.lib.MyMessage;
+import kr.koo.findme.message.ChatActivity;
 import kr.koo.findme.type.ItemCreateInput;
 import kr.koo.findme.type.ItemWhereInput;
 import kr.koo.findme.type.ItemWhereUniqueInput;
-import kr.koo.findme.type.UserCreateInput;
 import kr.koo.findme.type.UserWhereUniqueInput;
 import kr.koo.findme.ui.acquisition.AcquisitionFragment;
 import kr.koo.findme.ui.list.RegListFragment;
@@ -37,8 +36,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.nfc.FormatException;
 import android.nfc.NdefMessage;
@@ -50,14 +47,15 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.SimpleAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,19 +63,21 @@ import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -108,12 +108,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView message;
     Button btnWrite;
     Button btnAddItem;
+    Button readForAlert;
 
     String imgString;
     AlertDialog alertDialog;
 
     LinearLayout nfc_registration;
     LinearLayout nfc_read;
+    LinearLayout nfc_message;
+    LinearLayout nfc_home;
+
+
+    // nfc_message 사용 변수
+    private ListView listView;
+    private ArrayAdapter<String> arrayAdapter;
+    private ArrayList<String> arr_roomList = new ArrayList<>();
+    private DatabaseReference reference = FirebaseDatabase.getInstance()
+            .getReference().getRoot();
+    Map<String, Object> map = new HashMap<String, Object>();
+    Map<String, String> set = new HashMap<String,String>();
+
+
 
 
     private ImageView imgPreview;
@@ -183,8 +198,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+
+
         nfc_registration.setVisibility(View.GONE);
         nfc_read.setVisibility(View.GONE);
+        nfc_message.setVisibility(View.GONE);
+        nfc_home.setVisibility(View.GONE);
+
+
         Fragment fragment = null;
         String title = getString(R.string.app_name);
         if (id == R.id.nav_nfc_registration) {
@@ -210,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_message) {
             fragment = new MessageFragment();
             title = "MESSAGE";
+            nfc_message.setVisibility(View.VISIBLE);
         }
         if (fragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -232,7 +254,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void xmlSet(){
         nfc_registration = (LinearLayout) findViewById(R.id.nfc_registration); // nfc 등록 xml
         nfc_read = (LinearLayout) findViewById(R.id.nfc_read);                 // nfc 등록 xml
+        nfc_message = (LinearLayout) findViewById(R.id.nfc_message);           // nfc 등록 xml
+        nfc_home = (LinearLayout) findViewById(R.id.nfc_home);                 // nfc 등록 xml
     }
+
 
     public void navigationSet(){
         Toolbar toolbar = findViewById(R.id.toolbar); // 위 상단 툴바
@@ -250,6 +275,60 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         View headerLayout = navigationView.inflateHeaderView(R.layout.nav_header_main2);
         userNameText = headerLayout.findViewById(R.id.usernameText);                    // 네비게이션 바 사용자이름
+    }
+    public void nfcMessageSet(){
+        listView = (ListView) findViewById(R.id.list);
+        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_roomList);
+        listView.setAdapter(arrayAdapter);
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+
+//                Map<String, String> setMap = new HashMap<String, String>();
+                Iterator i = dataSnapshot.getChildren().iterator();
+
+                while (i.hasNext()) {
+                    String key = ((DataSnapshot) i.next()).getKey();
+                    String[] keySplit = key.split("&");
+                    String itemName = keySplit[3];
+                    String userId = keySplit[0];
+                    String itemId = keySplit[2];
+                    String itemUser = keySplit[1];
+
+                    if(user.id.equals(userId)){
+                        set.put("내가쓴글/"+itemName ,key);
+                    }
+                    else{
+                        if(key.contains(user.id))
+                            set.put(itemName,key);
+                    }
+                }
+                arr_roomList.clear();
+                arr_roomList.addAll(set.keySet());
+
+                arrayAdapter.notifyDataSetChanged();
+            }
+
+            @Override public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                String room_name = set.get(((TextView) view).getText().toString());
+                intent.putExtra("room_name", room_name);
+                intent.putExtra("user_name", user.id+"/"+user.name);
+                intent.putExtra("item_user", room_name.split("&")[1]);
+                startActivity(intent);
+            }
+        });
+
+
     }
     public void nfcRegSet(){
         mViewPager = (ViewPager)  findViewById(R.id.viewPager);
@@ -381,9 +460,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 @Override
                                 public void onResponse(@Nonnull Response<UserQuery.Data> response) {
                                     user = response.data().user();
-
                                     ItemListUp(user.id);
-
+                                    nfcRegSet();        // nfc_registration 안에 뷰페이저 및 기본 설정
+                                    nfcReadSet();       // nfc_read 설정
+                                    nfcMessageSet();    // nfc_message 설정
                                 }
 
                                 @Override
@@ -401,6 +481,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         readItemName = (TextView) findViewById(R.id.readItemName);
         readUserInfo = (TextView) findViewById(R.id.readUserInfo);
         readImage = (ImageView) findViewById(R.id.readImage);
+        readForAlert = (Button) findViewById(R.id.readForAlert);
+
+
     }
 
     public void nfcSet(){
@@ -429,8 +512,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         xmlSet();           //xml 설정
         navigationSet();    // navigation 설정
-        nfcRegSet();        // nfc_registration 안에 뷰페이저 및 기본 설정
-        nfcReadSet();       // nfc_read 설정
+
         getUserInfo();      // 로그인시 넘어오는 Intent에서 로그인 정보 조회
         nfcSet();           // nfc 설정
 
@@ -650,6 +732,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                                                                     "Name : " + read_user.name + "\n" +
                                                                                                     "H.P. : " + read_user.phonenumber + "\n" +
                                                                                                     "Birthday : " + read_user.birthday + "\n");
+                                                                                            setOnClick(readForAlert,user.id + "&" + read_user.id + "&" + read_item.id + "&" + read_item.itemname);
                                                                                         }});
 
                                                                                 }
@@ -719,7 +802,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        imgPreview.setImageBitmap(myBitmapAgain);
 
     }
-
+    private void setOnClick(final Button btn, final String str){
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                map.put(str, "");
+                reference.updateChildren(map);
+            }
+        });
+    }
 
     /******************************************************************************
      **********************************Write to NFC Tag****************************

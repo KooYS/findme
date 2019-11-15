@@ -41,11 +41,14 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
 
 
-
     implementation 'com.google.firebase:firebase-core:17.0.0'
     implementation 'com.google.firebase:firebase-messaging:20.0.0'
     implementation 'com.google.firebase:firebase-database:19.1.0'
     implementation 'androidx.work:work-runtime:2.2.0'
+    //Okhttp
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    //Gson
+    implementation 'com.google.code.gson:gson:2.8.5'
 
 }
 

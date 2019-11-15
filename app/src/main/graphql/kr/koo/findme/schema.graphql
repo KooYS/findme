@@ -9,6 +9,7 @@ query Users{
         phonenumber
         birthday
         address
+        token
     }
 }
 
@@ -40,6 +41,7 @@ query user($where : UserWhereUniqueInput!){
         phonenumber
         birthday
         address
+        token
     }
 }
 

@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <TextView
             android:textSize="30dp"
@@ -43,6 +43,18 @@
             android:textStyle="bold"
             android:textColor="#4B0082"
              />
+
+        <Button
+            android:id="@+id/readForAlert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:background="@drawable/gradient_button"
+            android:text="Alert"
+            android:textColor="@android:color/white"
+            android:theme="@style/ButtonStyle" />
+
 
 
     </LinearLayout>
