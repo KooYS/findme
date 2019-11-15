@@ -28,6 +28,7 @@
         android:orientation="vertical">
 
         <EditText
+            android:id="@+id/id"
             android:layout_gravity="center"
             android:layout_marginLeft="41dp"
             android:layout_marginRight="41dp"
@@ -44,13 +45,14 @@
             android:background="@drawable/rect"/>
 
         <EditText
+            android:id="@+id/birth"
             android:layout_gravity="center"
             android:layout_marginTop="21dp"
             android:layout_marginLeft="41dp"
             android:layout_marginRight="41dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="연락처를 입력해주세요."
+            android:hint="생년월일을 입력해주세요.(YYYYMMDD)"
             android:inputType="number"
             android:paddingLeft="20dp"
             android:paddingTop="14dp"
@@ -61,6 +63,43 @@
             android:background="@drawable/rect"/>
 
         <EditText
+            android:id="@+id/phone"
+            android:layout_gravity="center"
+            android:layout_marginTop="21dp"
+            android:layout_marginLeft="41dp"
+            android:layout_marginRight="41dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="연락처를 입력해주세요.(- 생략)"
+            android:inputType="number"
+            android:paddingLeft="20dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:textColorHint="#ffffff"
+            android:textColor="#ffffff"
+            android:textSize="11.5sp"
+            android:background="@drawable/rect"/>
+
+        <EditText
+            android:id="@+id/addr"
+            android:layout_gravity="center"
+            android:layout_marginTop="21dp"
+            android:layout_marginLeft="41dp"
+            android:layout_marginRight="41dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="주소정보를 입력해주세요."
+            android:inputType="text"
+            android:paddingLeft="20dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:textColorHint="#ffffff"
+            android:textColor="#ffffff"
+            android:textSize="11.5sp"
+            android:background="@drawable/rect"/>
+
+        <EditText
+            android:id="@+id/name"
             android:layout_gravity="center"
             android:layout_marginTop="21dp"
             android:layout_marginLeft="41dp"
@@ -79,6 +118,7 @@
 
 
         <EditText
+            android:id="@+id/passwd"
             android:layout_gravity="center"
             android:layout_marginTop="21dp"
             android:layout_marginLeft="41dp"
@@ -98,6 +138,7 @@
             android:background="@drawable/rect"/>
 
         <EditText
+            android:id="@+id/repasswd"
             android:layout_gravity="center"
             android:layout_marginTop="21dp"
             android:layout_marginLeft="41dp"
@@ -122,6 +163,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="회원가입"
+            android:id="@+id/join"
             android:textAllCaps="false"
             android:layout_gravity="center"
             android:paddingLeft="48dp"
@@ -137,25 +179,27 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_gravity="center"
             android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp"
-            android:layout_gravity="center">
+            android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="109dp"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:text="기존 회원이십니까?"
-                android:textSize="11.5sp"
-                android:textColor="#B3ffffff"/>
+                android:textColor="#B3ffffff"
+                android:textSize="11.5sp" />
+
             <TextView
-                android:id="@+id/signup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/login"
+                android:layout_width="56dp"
+                android:layout_height="29dp"
                 android:text="로그인"
-                android:layout_marginLeft="9dp"
+                android:gravity="center"
                 android:textColor="#ffffff"
-                android:textSize="11.5sp"/>
+                android:textSize="11.5sp" />
+
 
         </LinearLayout>
 

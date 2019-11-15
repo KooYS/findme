@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_nfc_registration"
+            android:title="@string/menu_nfc_registration" />
+        <item
+            android:id="@+id/nav_nfc_read"
+            android:title="@string/menu_nfc_read" />
+        <item
+            android:id="@+id/nav_registered_list"
+            android:title="@string/menu_registered_list" />
+        <item
+            android:id="@+id/nav_loss_report"
+            android:title="@string/menu_loss_report" />
+        <item
+            android:id="@+id/nav_acquisition_report"
+            android:title="@string/menu_acquisition_report" />
+        <item
+            android:id="@+id/nav_message"
+            android:title="@string/menu_message" />
+    </group>
+
+    <item android:title="Logout">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@android:drawable/ic_menu_set_as"
+                android:title="@string/menu_logout" />
+
+        </menu>
+    </item>
+
+</menu>

@@ -54,20 +54,21 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="109dp"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:text="기존 회원이십니까?"
-                android:textSize="11.5sp"
-                android:textColor="#B3ffffff"/>
+                android:textColor="#B3ffffff"
+                android:textSize="11.5sp" />
 
             <TextView
                 android:id="@+id/login"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="56dp"
+                android:layout_height="29dp"
                 android:text="로그인"
-                android:layout_marginLeft="9dp"
-                android:textSize="11.5sp"
-                android:textColor="#ffffff"/>
+                android:gravity="center"
+                android:textColor="#ffffff"
+                android:textSize="11.5sp" />
 
         </LinearLayout>
 

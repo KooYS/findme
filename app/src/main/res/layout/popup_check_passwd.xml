@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <TextView
+                android:textSize="30dp"
+                android:textStyle="bold"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="20dp"
+                android:gravity="center"
+                android:textColor="#4B0082"
+                android:text="PASSWORD" />
+
+        </TableRow>
+
+
+
+    <EditText
+        android:id="@+id/check_itemPasswd"
+        android:hint="Please enter a password to look up."
+        android:inputType="text" />
+
+
+
+    <TableRow
+        android:gravity="center_horizontal"
+        android:stretchColumns="0"
+        android:orientation="horizontal">
+
+
+    </TableRow>
+
+            <Button
+                android:id="@+id/check_btn_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:theme="@style/ButtonStyle"
+                android:background="@drawable/gradient_button"
+                android:textColor="@android:color/white"
+                android:text="CONFIRM"
+                android:textSize="20dp"
+                android:textAllCaps="false"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"/>
+
+</TableLayout>

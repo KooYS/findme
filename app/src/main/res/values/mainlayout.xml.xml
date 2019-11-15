@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="menu">
+        <item>My Registered NFC</item>
+        <item>Report of the Loss</item>
+        <item>Report of the Acquisition</item>
+        <item>Message</item>
+    </string-array>
+
+</resources>

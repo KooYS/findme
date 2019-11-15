@@ -28,6 +28,7 @@
         android:orientation="vertical">
 
         <EditText
+            android:id="@+id/id"
             android:layout_gravity="center"
             android:layout_marginLeft="41dp"
             android:layout_marginRight="41dp"
@@ -45,6 +46,7 @@
 
 
         <EditText
+            android:id="@+id/passwd"
             android:layout_gravity="center"
             android:layout_marginTop="21dp"
             android:layout_marginLeft="41dp"
@@ -64,7 +66,7 @@
             android:background="@drawable/rect"/>
 
         <TextView
-            android:id="@+id/login"
+            android:id="@+id/login_login"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="로그인"
@@ -89,19 +91,21 @@
             android:layout_gravity="center">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="104dp"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:text="회원이 아니십니까?"
-                android:textSize="11.5sp"
-                android:textColor="#B3ffffff"/>
+                android:textColor="#B3ffffff"
+                android:textSize="11.5sp" />
+
             <TextView
-                android:id="@+id/signup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/login_signup"
+                android:layout_width="70dp"
+                android:layout_height="28dp"
                 android:text="회원가입"
-                android:layout_marginLeft="9dp"
+                android:gravity="center"
                 android:textColor="#ffffff"
-                android:textSize="11.5sp"/>
+                android:textSize="11.5sp" />
 
         </LinearLayout>
 

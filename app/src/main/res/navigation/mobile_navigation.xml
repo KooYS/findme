@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_nfc_registration">
+
+    <fragment
+        android:id="@+id/nav_nfc_registration"
+        android:name="kr.koo.findme.ui.reg.RegistrationFragment"
+        android:label="@string/menu_nfc_registration"
+        tools:layout="@layout/fragment_reg" />
+
+    <fragment
+        android:id="@+id/nav_nfc_read"
+        android:name="kr.koo.findme.ui.read.ReadFragment"
+        android:label="@string/menu_nfc_read"
+        tools:layout="@layout/fragment_read" />
+
+
+    <fragment
+        android:id="@+id/nav_registered_list"
+        android:name="kr.koo.findme.ui.list.RegListFragment"
+        android:label="@string/menu_registered_list"
+        tools:layout="@layout/fragment_list" />
+
+    <fragment
+        android:id="@+id/nav_loss_report"
+        android:name="kr.koo.findme.ui.loss.LossFragment"
+        android:label="@string/menu_loss_report"
+        tools:layout="@layout/fragment_loss" />
+
+    <fragment
+        android:id="@+id/nav_acquisition_report"
+        android:name="kr.koo.findme.ui.acquisition.AcquisitionFragment"
+        android:label="@string/menu_acquisition_report"
+        tools:layout="@layout/fragment_acquisition" />
+
+    <fragment
+        android:id="@+id/nav_message"
+        android:name="kr.koo.findme.ui.message.MessageFragment"
+        android:label="@string/menu_message"
+        tools:layout="@layout/fragment_message" />
+
+</navigation>

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "557916848911",
+    "firebase_url": "https://findme-50ef5.firebaseio.com",
+    "project_id": "findme-50ef5",
+    "storage_bucket": "findme-50ef5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:557916848911:android:27e8ade1b3a0d5c948f47a",
+        "android_client_info": {
+          "package_name": "kr.koo.findme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "557916848911-a6r6l8t4hcg2cdi22a8sf3er3df1u1e5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBX-yNCo-KBBwRJtWLLz-oiF9vsOQ0r3lE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "557916848911-a6r6l8t4hcg2cdi22a8sf3er3df1u1e5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

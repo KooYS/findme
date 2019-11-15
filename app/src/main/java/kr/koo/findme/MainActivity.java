@@ -1,37 +1,94 @@
 package kr.koo.findme;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+import androidx.viewpager.widget.ViewPager;
+import kr.koo.findme.card.CardItem;
+import kr.koo.findme.card.CardPagerAdapter;
+import kr.koo.findme.card.ShadowTransformer;
+import kr.koo.findme.lib.MyBitmap;
+import kr.koo.findme.lib.MyMessage;
+import kr.koo.findme.type.ItemCreateInput;
+import kr.koo.findme.type.ItemWhereInput;
+import kr.koo.findme.type.ItemWhereUniqueInput;
+import kr.koo.findme.type.UserCreateInput;
+import kr.koo.findme.type.UserWhereUniqueInput;
+import kr.koo.findme.ui.acquisition.AcquisitionFragment;
+import kr.koo.findme.ui.list.RegListFragment;
+import kr.koo.findme.ui.loss.LossFragment;
+import kr.koo.findme.ui.message.MessageFragment;
+import kr.koo.findme.ui.read.ReadFragment;
+import kr.koo.findme.ui.reg.RegistrationFragment;
+import okhttp3.OkHttpClient;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
-import android.nfc.NfcEvent;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.apollographql.apollo.ApolloCall;
+import com.apollographql.apollo.ApolloClient;
+import com.apollographql.apollo.api.Response;
+import com.apollographql.apollo.exception.ApolloException;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
 
     public static final String ERROR_DETECTED = "No NFC tag detected!";
     public static final String WRITE_SUCCESS = "Text written to the NFC tag successfully!";
     public static final String WRITE_ERROR = "Error during writing, is the NFC tag close enough to your device?";
+    private static final int PICK_IMAGE_REQUEST = 100;
     NfcAdapter nfcAdapter;
     PendingIntent pendingIntent;
     IntentFilter writeTagFilters[];
@@ -39,41 +96,314 @@ public class MainActivity extends Activity {
     Tag myTag;
     Context context;
 
-    TextView tvNFCContent;
+
+
+
+    TextView readItemName;
+    TextView readUserInfo;
+    TextView userNameText;
+    ImageView readImage;
+
+
     TextView message;
     Button btnWrite;
+    Button btnAddItem;
+
+    String imgString;
+    AlertDialog alertDialog;
+
+    LinearLayout nfc_registration;
+    LinearLayout nfc_read;
+
+
+    private ImageView imgPreview;
+    private  static ApolloClient myApollo;
+    public UserQuery.User user;
+    private ViewPager mViewPager;
+    private CardPagerAdapter mCardAdapter;
+    private ShadowTransformer mCardShadowTransformer;
+    private AppBarConfiguration mAppBarConfiguration;
+
+
+
+    public  static ApolloClient getMyApollo(){
+        myApollo = ApolloClient.builder()
+                .serverUrl("https://us1.prisma.sh/tlfkthsl42-b639da/findme/dev")
+                .okHttpClient(
+                        new OkHttpClient.Builder()
+                                .connectTimeout(30, TimeUnit.SECONDS)
+                                .writeTimeout(30, TimeUnit.SECONDS)
+                                .readTimeout(30, TimeUnit.SECONDS)
+                                .build()
+                )
+                .build();
+
+        return myApollo;
+    }
+
+
+
+    public void pick(View v) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        context = this;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode){
+            case PICK_IMAGE_REQUEST:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = data.getData();
+                    //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+                    Bitmap bitmap = MyBitmap.resize(context, selectedImage,300);
+                    String myBase64Image = MyBitmap.encodeToBase64(bitmap, Bitmap.CompressFormat.JPEG, 100);
 
-        tvNFCContent = (TextView) findViewById(R.id.nfc_contents);
-        message = (TextView) findViewById(R.id.edit_message);
-        btnWrite = (Button) findViewById(R.id.button);
+                    imgString = myBase64Image;
+                    Bitmap myBitmapAgain = MyBitmap.decodeBase64(myBase64Image);
 
-        btnWrite.setOnClickListener(new View.OnClickListener()
+                    imgPreview.setImageBitmap(myBitmapAgain);
+
+                }
+                break;
+        }
+    }
+
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                || super.onSupportNavigateUp();
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+        nfc_registration.setVisibility(View.GONE);
+        nfc_read.setVisibility(View.GONE);
+        Fragment fragment = null;
+        String title = getString(R.string.app_name);
+        if (id == R.id.nav_nfc_registration) {
+            // Handle the camera action
+            fragment = new RegistrationFragment();
+            title = "NFC Registration";
+            nfc_registration.setVisibility(View.VISIBLE);
+        }
+        else if (id == R.id.nav_nfc_read) {
+            // Handle the camera action
+            fragment = new ReadFragment();
+            title = "NFC READ";
+            nfc_read.setVisibility(View.VISIBLE);
+        } else if (id == R.id.nav_registered_list) {
+            fragment = new RegListFragment();
+            title = "REGISTERED LIST";
+        } else if (id == R.id.nav_loss_report) {
+            fragment = new LossFragment();
+            title = "THE LOSS REPORT";
+        } else if (id == R.id.nav_acquisition_report) {
+            fragment = new AcquisitionFragment();
+            title = "THE ACQUISITION REPORT";
+        } else if (id == R.id.nav_message) {
+            fragment = new MessageFragment();
+            title = "MESSAGE";
+        }
+        if (fragment != null) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.nav_host_fragment, fragment);
+            ft.commit();
+
+            // set the toolbar title
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(title);
+            }
+
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+
+        }
+
+        return true;
+    }
+
+    public void xmlSet(){
+        nfc_registration = (LinearLayout) findViewById(R.id.nfc_registration); // nfc 등록 xml
+        nfc_read = (LinearLayout) findViewById(R.id.nfc_read);                 // nfc 등록 xml
+    }
+
+    public void navigationSet(){
+        Toolbar toolbar = findViewById(R.id.toolbar); // 위 상단 툴바
+        setSupportActionBar(toolbar);                 // 위 상단 툴바
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);                       // 네비게이션 바
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view); // 네비게이션 바
+        navigationView.setNavigationItemSelectedListener(this);                       // 네비게이션 바
+
+        mAppBarConfiguration = new AppBarConfiguration.Builder(                       // 네비게이션 바 버튼 구성
+                R.id.nav_nfc_registration, R.id.nav_nfc_read, R.id.nav_registered_list,
+                R.id.nav_loss_report, R.id.nav_acquisition_report, R.id.nav_message)
+                .setDrawerLayout(drawer)
+                .build();
+
+        View headerLayout = navigationView.inflateHeaderView(R.layout.nav_header_main2);
+        userNameText = headerLayout.findViewById(R.id.usernameText);                    // 네비게이션 바 사용자이름
+    }
+    public void nfcRegSet(){
+        mViewPager = (ViewPager)  findViewById(R.id.viewPager);
+        mCardAdapter = new CardPagerAdapter();
+        mCardShadowTransformer = new ShadowTransformer(mViewPager, mCardAdapter);
+
+        mViewPager.setAdapter(mCardAdapter);
+        mViewPager.setPageTransformer(false, mCardShadowTransformer);
+        mViewPager.setOffscreenPageLimit(3);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
         {
             @Override
-            public void onClick(View v) {
-                try {
-                    if(myTag ==null) {
-                        Toast.makeText(context, ERROR_DETECTED, Toast.LENGTH_LONG).show();
-                    } else {
-                        write(message.getText().toString(), myTag);
-                        Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
-                    }
-                } catch (IOException e) {
-                    Toast.makeText(context, WRITE_ERROR, Toast.LENGTH_LONG ).show();
-                    e.printStackTrace();
-                } catch (FormatException e) {
-                    Toast.makeText(context, WRITE_ERROR, Toast.LENGTH_LONG ).show();
-                    e.printStackTrace();
-                }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
+                mCardShadowTransformer.enableScaling(false);
+            }
+
+            @Override
+            public void onPageSelected(int position)
+            {
+                mCardShadowTransformer.enableScaling(true);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                mCardShadowTransformer.enableScaling(false);
             }
         });
 
+        btnAddItem = (Button) findViewById(R.id.addItem);
+        btnAddItem.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+
+                // 아이템 추가시 Alert 생성
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                alertDialogBuilder.setCancelable(false);
+
+                LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+                View popupInputDialogView = layoutInflater.inflate(R.layout.popup_add_item, null);
+
+                // alert element 생성
+                final EditText itemNameEditText = (EditText) popupInputDialogView.findViewById(R.id.itemName);
+                final EditText itemPasswdEditText = (EditText) popupInputDialogView.findViewById(R.id.itemPasswd);
+                final Button saveButton = popupInputDialogView.findViewById(R.id.btn_add);
+                final Button cancelButton = popupInputDialogView.findViewById(R.id.btn_cancel);
+                imgPreview = (ImageView) popupInputDialogView.findViewById(R.id.imgPreview);
+                // alert element 생성
+
+                alertDialogBuilder.setView(popupInputDialogView);
+                alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+
+                // Registration 버튼
+                saveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View view) {
+
+                        // ProgressDialog 생성
+                        final ProgressDialog dialog = ProgressDialog.show(view.getContext(), "",
+                                "Loading. Please wait...", true);
+
+
+
+                        //  DB 저장
+                        final String itemName = itemNameEditText.getText().toString();
+                        final String itemPasswd = itemPasswdEditText.getText().toString();
+
+                        CreateItemMutation createItemmutation = CreateItemMutation.builder()
+                                .data(ItemCreateInput.builder()
+                                        .userid(user.id)
+                                        .itemname(itemName)
+                                        .itempasswd(itemPasswd)
+                                        .img(imgString).build())
+                                .build();
+
+                        getMyApollo()
+                                .mutate(createItemmutation)
+                                .enqueue(
+                                        (new ApolloCall.Callback<CreateItemMutation.Data>() {
+                                            @Override public void onResponse(@Nonnull Response<CreateItemMutation.Data> response) {
+                                                Log.i("mutation", response.toString());
+                                                if(response == null){
+                                                    runOnUiThread(new Runnable() {
+                                                        public void run() {
+                                                            Toast.makeText(context, "다른 이미지를 사용해주세요. 용량이 너무 큽니다.", Toast.LENGTH_LONG).show();
+                                                        }});
+                                                }
+                                                final String res = response.data().createItem().id();
+                                                NewData(res,itemName);
+
+                                                dialog.cancel();
+                                                alertDialog.cancel();
+                                            }
+
+                                            @Override public void onFailure(@Nonnull ApolloException e) {
+                                                Log.e("mutation", e.getMessage(), e);
+                                            }
+                                        }));
+
+                    }
+                });
+
+                cancelButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        alertDialog.cancel();
+                    }
+                });
+
+            }
+        });
+
+    }
+
+    public void getUserInfo(){
+        Intent intent = getIntent();
+
+        try {
+            UserQuery userQuery = UserQuery.builder()
+                    .where(UserWhereUniqueInput.builder().id(intent.getExtras().getString("user")).build())
+                    .build();
+
+            getMyApollo()
+                    .query(userQuery)
+                    .enqueue(
+                            (new ApolloCall.Callback<UserQuery.Data>() {
+                                @Override
+                                public void onResponse(@Nonnull Response<UserQuery.Data> response) {
+                                    user = response.data().user();
+
+                                    ItemListUp(user.id);
+
+                                }
+
+                                @Override
+                                public void onFailure(@Nonnull ApolloException e) {
+                                    Log.e("query", e.getMessage(), e);
+
+                                }
+                            }));
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void nfcReadSet(){
+        readItemName = (TextView) findViewById(R.id.readItemName);
+        readUserInfo = (TextView) findViewById(R.id.readUserInfo);
+        readImage = (ImageView) findViewById(R.id.readImage);
+    }
+
+    public void nfcSet(){
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
             // Stop here, we definitely need NFC
@@ -83,12 +413,135 @@ public class MainActivity extends Activity {
         readFromIntent(getIntent());
 
         pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+//        nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
+//        pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
         writeTagFilters = new IntentFilter[] { tagDetected };
     }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        //firebase ㅊㅐ팅
+        /////
+        context = this;
+
+        xmlSet();           //xml 설정
+        navigationSet();    // navigation 설정
+        nfcRegSet();        // nfc_registration 안에 뷰페이저 및 기본 설정
+        nfcReadSet();       // nfc_read 설정
+        getUserInfo();      // 로그인시 넘어오는 Intent에서 로그인 정보 조회
+        nfcSet();           // nfc 설정
+
+    }
+    public void ItemListUp(final String id){
+        runOnUiThread(new Runnable() {
+            public void run() {
+                try {
+                    userNameText.setText(user.name);
+                    final ProgressDialog progressDialog;
+                    progressDialog= new ProgressDialog(MainActivity.this);
+                    progressDialog.setMessage("Please wait...");
+                    progressDialog.show();
+
+                    ItemsQuery itemsQuery = ItemsQuery.builder()
+                            .where(ItemWhereInput.builder().userid(id).build())
+                            .build();
+
+                    getMyApollo()
+                            .query(itemsQuery)
+                            .enqueue(
+                                    (new ApolloCall.Callback<ItemsQuery.Data>() {
+
+                                        @Override
+                                        public void onResponse(@Nonnull Response<ItemsQuery.Data> response) {
+
+                                            for(ItemsQuery.Item object : response.data().items()) {
+                                                OnNewSensorData(object);
+
+                                            }
+                                            progressDialog.cancel();
+
+                                        }
+
+                                        @Override
+                                        public void onFailure(@Nonnull ApolloException e) {
+                                            Log.e("query", e.getMessage(), e);
+
+                                        }
+                                    }));
 
 
+                } catch (Exception e) {
+
+                }
+            }
+        });
+    }
+    public void NewData(final  String res, final String itemName){
+        runOnUiThread(new Runnable() {
+            public void run() {
+                mCardAdapter.addCardItem(new CardItem(itemName, imgString,res,
+                        new NFCButtonOnClickListener(res, new Callable<Void>() {
+                            public Void call() {
+                                try {
+                                    if(myTag ==null) {
+                                        Toast.makeText(context, ERROR_DETECTED, Toast.LENGTH_LONG).show();
+                                    } else {
+                                        //write(message.getText().toString(), myTag);
+                                        write("itemname="+ itemName + "&" + "id="+ res + "&userid="+ user.id , myTag);
+                                        Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+                                    }
+                                } catch (IOException e) {
+                                    Toast.makeText(context, WRITE_ERROR, Toast.LENGTH_LONG ).show();
+                                    e.printStackTrace();
+                                } catch (FormatException e) {
+                                    Toast.makeText(context, WRITE_ERROR, Toast.LENGTH_LONG ).show();
+                                    e.printStackTrace();
+                                }
+                                return null;
+                            }
+                        })));
+                mCardShadowTransformer = new ShadowTransformer(mViewPager, mCardAdapter);
+                mViewPager.setAdapter(mCardAdapter);
+                mViewPager.setPageTransformer(false, mCardShadowTransformer);
+                mViewPager.setOffscreenPageLimit(3);
+            }
+        });
+
+    }
+    public void OnNewSensorData(final ItemsQuery.Item data) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+
+                mCardAdapter.addCardItem(new CardItem( data.itemname, data.img,data.id, new NFCButtonOnClickListener(data.id, new Callable<Void>() {
+                    public Void call() {
+                        try {
+                            if(myTag ==null) {
+                                Toast.makeText(context, ERROR_DETECTED, Toast.LENGTH_LONG).show();
+                            } else {
+                                //write(message.getText().toString(), myTag);
+                                write("itemname="+ data.itemname + "&" + "id="+ data.id + "&userid="+ user.id + "&itempasswd="+ data.itempasswd , myTag);
+                                Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+                            }
+                        } catch (IOException e) {
+                            Toast.makeText(context, WRITE_ERROR, Toast.LENGTH_LONG ).show();
+                            e.printStackTrace();
+                        } catch (FormatException e) {
+                            Toast.makeText(context, WRITE_ERROR, Toast.LENGTH_LONG ).show();
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                })));
+                mCardShadowTransformer = new ShadowTransformer(mViewPager, mCardAdapter);
+                mViewPager.setAdapter(mCardAdapter);
+                mViewPager.setPageTransformer(false, mCardShadowTransformer);
+                mViewPager.setOffscreenPageLimit(3);
+            }
+        });
+    }
     /******************************************************************************
      **********************************Read From NFC Tag***************************
      ******************************************************************************/
@@ -125,7 +578,146 @@ public class MainActivity extends Activity {
             Log.e("UnsupportedEncoding", e.toString());
         }
 
-        tvNFCContent.setText("NFC Content: " + text);
+
+
+
+        final String[] split = text.split("&");
+
+
+        try {
+            ItemQuery itemQuery = ItemQuery.builder()
+                    .where(ItemWhereUniqueInput.builder().id(split[1].split("=")[1]).build())
+                    .build();
+
+            getMyApollo()
+                    .query(itemQuery)
+                    .enqueue(
+                            (new ApolloCall.Callback<ItemQuery.Data>() {
+                                @Override
+                                public void onResponse(@Nonnull Response<ItemQuery.Data> response) {
+                                    final ItemQuery.Item read_item = response.data().item();
+                                    runOnUiThread(new Runnable() {
+                                        public void run() {
+
+
+
+                                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                                            alertDialogBuilder.setCancelable(false);
+
+
+                                            LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+                                            View popupInputDialogView = layoutInflater.inflate(R.layout.popup_check_passwd, null);
+
+                                            final EditText itemPasswdEditText = (EditText) popupInputDialogView.findViewById(R.id.check_itemPasswd);
+                                            final Button saveButton = popupInputDialogView.findViewById(R.id.check_btn_add);
+
+                                            // Set the inflated layout view object to the AlertDialog builder.
+                                            alertDialogBuilder.setView(popupInputDialogView);
+
+                                            // Create AlertDialog and show.
+                                            alertDialog = alertDialogBuilder.create();
+                                            alertDialog.show();
+
+                                            saveButton.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(final View view) {
+                                                    final ProgressDialog dialog = ProgressDialog.show(view.getContext(), "",
+                                                            "Loading. Please wait...", true);
+
+                                                    final String itemPasswd = itemPasswdEditText.getText().toString();
+
+                                                    if(read_item.itempasswd.equals(itemPasswd)){
+
+                                                        readItemName.setText("Item Name : " + split[0].split("=")[1]);
+                                                        Bitmap myBitmapAgain = MyBitmap.decodeBase64(read_item.img);
+                                                        readImage.setImageBitmap(myBitmapAgain);
+
+                                                        try {
+                                                            UserQuery userQuery = UserQuery.builder()
+                                                                    .where(UserWhereUniqueInput.builder().id(split[2].split("=")[1]).build())
+                                                                    .build();
+
+                                                            getMyApollo()
+                                                                    .query(userQuery)
+                                                                    .enqueue(
+                                                                            (new ApolloCall.Callback<UserQuery.Data>() {
+                                                                                @Override
+                                                                                public void onResponse(@Nonnull Response<UserQuery.Data> response) {
+                                                                                    final UserQuery.User read_user = response.data().user();
+                                                                                    runOnUiThread(new Runnable() {
+                                                                                        public void run() {
+                                                                                            readUserInfo.setText("Address : " + read_user.address + "\n" +
+                                                                                                    "Name : " + read_user.name + "\n" +
+                                                                                                    "H.P. : " + read_user.phonenumber + "\n" +
+                                                                                                    "Birthday : " + read_user.birthday + "\n");
+                                                                                        }});
+
+                                                                                }
+
+                                                                                @Override
+                                                                                public void onFailure(@Nonnull ApolloException e) {
+                                                                                    Log.e("query", e.getMessage(), e);
+
+                                                                                }
+                                                                            }));
+                                                        } catch (Exception e) {
+
+                                                        }
+
+                                                        dialog.cancel();
+                                                        alertDialog.cancel();
+                                                    }
+                                                    else
+                                                    {
+                                                        new AlertDialog.Builder(context)
+                                                                .setTitle("error")
+                                                                .setMessage("패스워드가 일치하지않습니다.")
+
+                                                                // Specifying a listener allows you to take an action before dismissing the dialog.
+                                                                // The dialog is automatically dismissed when a dialog button is clicked.
+                                                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                                                    public void onClick(DialogInterface dialog, int which) {
+                                                                        // Continue with delete operation
+                                                                    }
+                                                                })
+                                                                .setNegativeButton(android.R.string.no, null)
+                                                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                                                .show();
+
+                                                        dialog.cancel();
+                                                        alertDialog.cancel();
+                                                    }
+
+                                                }
+                                            });
+
+
+
+
+                                        }});
+                                }
+
+                                @Override
+                                public void onFailure(@Nonnull ApolloException e) {
+                                    Log.e("query", e.getMessage(), e);
+
+                                }
+                            }));
+        } catch (Exception e) {
+
+        }
+
+
+
+
+
+
+
+
+
+//        Bitmap myBitmapAgain = decodeBase64(text);
+//        imgPreview.setImageBitmap(myBitmapAgain);
+
     }
 
 
@@ -137,6 +729,7 @@ public class MainActivity extends Activity {
         NdefMessage message = new NdefMessage(records);
         // Get an instance of Ndef for the tag.
         Ndef ndef = Ndef.get(tag);
+//        Toast.makeText(context, tag.getId().toString(), Toast.LENGTH_LONG).show();
         // Enable I/O
         ndef.connect();
         // Write the message
@@ -186,9 +779,6 @@ public class MainActivity extends Activity {
         super.onResume();
         WriteModeOn();
     }
-
-
-
     /******************************************************************************
      **********************************Enable Write********************************
      ******************************************************************************/
@@ -203,4 +793,28 @@ public class MainActivity extends Activity {
         writeMode = false;
         nfcAdapter.disableForegroundDispatch(this);
     }
+
+
 }
+
+
+// [START retrieve_current_token]
+//                FirebaseInstanceId.getInstance().getInstanceId()
+//                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+//@Override
+//public void onComplete(@NonNull Task<InstanceIdResult> task) {
+//        if (!task.isSuccessful()) {
+//        Log.w(TAG, "getInstanceId failed", task.getException());
+//        return;
+//        }
+//
+//        // Get new Instance ID token
+//        String token = task.getResult().getToken();
+//
+//        // Log and toast
+//        String msg = getString(R.string.msg_token_fmt, token);
+//        Log.d(TAG, msg);
+//        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+//        }
+//        });
+// [END retrieve_current_token]

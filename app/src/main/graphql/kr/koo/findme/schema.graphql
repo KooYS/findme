@@ -1,4 +1,56 @@
 
-query Info {
-    info
+
+query Users{
+    users {
+        id
+        userid
+        password
+        name
+        phonenumber
+        birthday
+        address
+    }
+}
+
+query Items($where : ItemWhereInput!){
+    items(where : $where) {
+        id
+        img
+        userid
+        itemname
+        itempasswd
+    }
+}
+query Item($where : ItemWhereUniqueInput!){
+    item(where : $where) {
+        id
+        img
+        userid
+        itemname
+        itempasswd
+    }
+}
+
+query user($where : UserWhereUniqueInput!){
+    user(where : $where){
+        id
+        userid
+        password
+        name
+        phonenumber
+        birthday
+        address
+    }
+}
+
+mutation createItem($data: ItemCreateInput!) {
+    createItem(data: $data) {
+        id
+    }
+}
+
+mutation createUser($data: UserCreateInput!) {
+    createUser(data: $data) {
+        id
+    }
 }

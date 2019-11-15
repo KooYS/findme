@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">Findme</string>
+
+    <string name="app_menu_profile">PROFILE</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="nav_header_user_name">KIM MIN JO</string>
+
+    <string name="menu_nfc_registration">NFC REGISTRATION</string>
+    <string name="menu_nfc_read">NFC READ</string>
+    <string name="menu_registered_list">REGISTERED LIST</string>
+    <string name="menu_loss_report">THE LOSS REPORT</string>
+    <string name="menu_acquisition_report">THE ACQUISITION REPORT</string>
+    <string name="menu_message">MESSAGE</string>
+    <string name="menu_logout">LOGOUT</string>
+
+
 </resources>
