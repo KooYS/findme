@@ -18,6 +18,12 @@
     <string name="menu_acquisition_report">THE ACQUISITION REPORT</string>
     <string name="menu_message">MESSAGE</string>
     <string name="menu_logout">LOGOUT</string>
+    <string name="acquisition_area_label">ACQUISITION AREA</string>
+    <string name="acqusition_area_hint">Enter the place</string>
+    <string name="acquisition_date_label">ACQUISITION DATE</string>
+    <string name="acquisition_date_hint">Enter the date (YYYYMMDD)</string>
+    <string name="acquisition_item_label">ACQUISITION ITEM</string>
+    <string name="menu_profile">PROFILE</string>
 
 
 </resources>

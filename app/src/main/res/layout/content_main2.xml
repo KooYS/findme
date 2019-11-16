@@ -51,5 +51,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <include
+        layout="@layout/nfc_profile"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,6 +25,7 @@ import kr.koo.findme.ui.acquisition.AcquisitionFragment;
 import kr.koo.findme.ui.list.RegListFragment;
 import kr.koo.findme.ui.loss.LossFragment;
 import kr.koo.findme.ui.message.MessageFragment;
+import kr.koo.findme.ui.profile.ProfileFragment;
 import kr.koo.findme.ui.read.ReadFragment;
 import kr.koo.findme.ui.reg.RegistrationFragment;
 import okhttp3.OkHttpClient;
@@ -118,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     LinearLayout nfc_read;
     LinearLayout nfc_message;
     LinearLayout nfc_home;
+    ConstraintLayout nfc_profile;
     ConstraintLayout nfc_acquisition_report;
     ConstraintLayout nfc_lost_report;
 
@@ -202,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-
+        nfc_profile.setVisibility(View.GONE);
         nfc_registration.setVisibility(View.GONE);
         nfc_read.setVisibility(View.GONE);
         nfc_message.setVisibility(View.GONE);
@@ -213,7 +215,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Fragment fragment = null;
         String title = getString(R.string.app_name);
-        if (id == R.id.nav_nfc_registration) {
+
+        if (id == R.id.nav_profile) {
+            fragment = new ProfileFragment();
+            title = "PROFILE";
+            nfc_profile.setVisibility(View.VISIBLE);
+        }
+        else if (id == R.id.nav_nfc_registration) {
             // Handle the camera action
             fragment = new RegistrationFragment();
             title = "NFC Registration";
@@ -230,11 +238,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_loss_report) {
             fragment = new LossFragment();
             title = "THE LOSS REPORT";
-            nfc_acquisition_report.setVisibility(View.VISIBLE);
+            nfc_lost_report.setVisibility(View.VISIBLE);
         } else if (id == R.id.nav_acquisition_report) {
             fragment = new AcquisitionFragment();
             title = "THE ACQUISITION REPORT";
-            nfc_lost_report.setVisibility(View.VISIBLE);
+            nfc_acquisition_report.setVisibility(View.VISIBLE);
 
         } else if (id == R.id.nav_message) {
             fragment = new MessageFragment();
@@ -266,6 +274,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         nfc_home = (LinearLayout) findViewById(R.id.nfc_home);                 // nfc 등록 xml
         nfc_acquisition_report = (ConstraintLayout) findViewById(R.id.acquisition_report);                 // nfc 등록 xml
         nfc_lost_report = (ConstraintLayout) findViewById(R.id.lost_report);                 // nfc 등록 xml
+        nfc_profile = (ConstraintLayout) findViewById(R.id.nfc_profile);
     }
 
 
@@ -895,6 +904,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         nfcAdapter.disableForegroundDispatch(this);
     }
 
+    public void onClickMenu(View view) {
+        Toast.makeText(getApplicationContext(), "Test", Toast.LENGTH_SHORT).show();
+    }
 
 }
 

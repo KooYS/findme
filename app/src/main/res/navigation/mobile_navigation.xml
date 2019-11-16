@@ -6,6 +6,12 @@
     app:startDestination="@+id/nav_nfc_registration">
 
     <fragment
+        android:id="@+id/nav_nfc_profile"
+        android:name="kr.koo.findme.ui.profile.ProfileFragment"
+        android:label="PROFILE"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
         android:id="@+id/nav_nfc_registration"
         android:name="kr.koo.findme.ui.reg.RegistrationFragment"
         android:label="@string/menu_nfc_registration"

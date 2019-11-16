@@ -4,6 +4,11 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_profile"
+            android:title="@string/menu_profile" />
+
         <item
             android:id="@+id/nav_nfc_registration"
             android:title="@string/menu_nfc_registration" />
@@ -22,6 +27,7 @@
         <item
             android:id="@+id/nav_message"
             android:title="@string/menu_message" />
+
     </group>
 
     <item android:title="Logout">
