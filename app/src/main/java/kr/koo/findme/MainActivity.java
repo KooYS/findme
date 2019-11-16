@@ -501,8 +501,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         readUserInfo = (TextView) findViewById(R.id.readUserInfo);
         readImage = (ImageView) findViewById(R.id.readImage);
         readForAlert = (Button) findViewById(R.id.readForAlert);
-
-
+        readForAlert.setVisibility(View.GONE);
     }
 
     public void nfcSet(){
@@ -751,6 +750,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                                                                     "Name : " + read_user.name + "\n" +
                                                                                                     "H.P. : " + read_user.phonenumber + "\n" +
                                                                                                     "Birthday : " + read_user.birthday + "\n");
+                                                                                            readForAlert.setVisibility(View.VISIBLE);
                                                                                             setOnClick(readForAlert,user.id + "&" + read_user.id + "&" + read_item.id + "&" + read_item.itemname);
                                                                                         }});
 
@@ -827,6 +827,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 map.put(str, "");
                 reference.updateChildren(map);
+                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                intent.putExtra("room_name", str);
+                intent.putExtra("user_name", user.id+"/"+user.name);
+                intent.putExtra("item_user", str.split("&")[1]);
+                startActivity(intent);
+                readForAlert.setVisibility(View.GONE);
             }
         });
     }
