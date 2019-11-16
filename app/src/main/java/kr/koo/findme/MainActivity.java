@@ -683,7 +683,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         final String[] split = text.split("&");
 
-
+        if(nfc_read.getVisibility() == View.VISIBLE)
         try {
             ItemQuery itemQuery = ItemQuery.builder()
                     .where(ItemWhereUniqueInput.builder().id(split[1].split("=")[1]).build())
