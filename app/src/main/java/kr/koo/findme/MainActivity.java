@@ -20,6 +20,7 @@ import kr.koo.findme.message.ChatActivity;
 import kr.koo.findme.type.ItemCreateInput;
 import kr.koo.findme.type.ItemWhereInput;
 import kr.koo.findme.type.ItemWhereUniqueInput;
+import kr.koo.findme.type.LostReportCreateInput;
 import kr.koo.findme.type.UserWhereUniqueInput;
 import kr.koo.findme.ui.acquisition.AcquisitionFragment;
 import kr.koo.findme.ui.list.RegListFragment;
@@ -98,10 +99,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     boolean writeMode;
     Tag myTag;
     Context context;
+    boolean projectReady = false;
 
 
-
-
+    String lost_itemid = "";
+    String lost_itemname = "";
+    String acquisition_itemid = "";
+    String acquisition_itemname = "";
     TextView readItemName;
     TextView readUserInfo;
     TextView userNameText;
@@ -225,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.getMenu().getItem(3).setChecked(false);
             navigationView.getMenu().getItem(4).setChecked(false);
             navigationView.getMenu().getItem(5).setChecked(false);
+
             nfc_home.setVisibility(View.VISIBLE);
             currentStateforBackKey = "";
             return;
@@ -256,6 +261,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+
+        if(!projectReady)
+            return  false;
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -335,6 +343,159 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         nfc_acquisition_report = (ConstraintLayout) findViewById(R.id.acquisition_report);                 // nfc 등록 xml
         nfc_lost_report = (ConstraintLayout) findViewById(R.id.lost_report);                 // nfc 등록 xml
         nfc_profile = (ConstraintLayout) findViewById(R.id.nfc_profile);
+    }
+
+    public void lostSet(){
+        Button lost_item_btn = (Button) nfc_lost_report.findViewById(R.id.button_nfc_read);
+        Button lost_item_submit = (Button) nfc_lost_report.findViewById(R.id.button_complete);
+
+
+        lost_item_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                ArrayList<String> arr_lostList = new ArrayList<>();
+                final Map<String, String> lost_set = new HashMap<String,String>();
+                for(int i  = 0; i < mCardAdapter.mData.size() ;i ++){
+                    Toast.makeText(context,mCardAdapter.mData.get(i).getId(),Toast.LENGTH_LONG);
+//                    lost_item_btn.setText(mCardAdapter.mData.get(i).getId());
+                    lost_set.put(mCardAdapter.mData.get(i).getTitle() ,mCardAdapter.mData.get(i).getId());
+
+                }
+                arr_lostList.addAll(lost_set.keySet());
+                ListView lost_listView = (ListView) findViewById(R.id.lost_list);
+                lost_listView.setAdapter(new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, arr_lostList));
+
+                lost_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        lost_itemid = lost_set.get(((TextView) view).getText().toString());
+                        lost_itemname = ((TextView) view).getText().toString();
+//                        user.id
+                        Toast.makeText(context, ((TextView) view).getText().toString() + " : Selected", Toast.LENGTH_LONG).show();
+
+                        // 저장
+                    }
+                });
+
+
+
+
+
+            }
+        });
+
+
+        lost_item_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+
+                if(!lost_itemid.equals("")) {
+                    CreateLostReportMutation create = CreateLostReportMutation.builder()
+                            .data(LostReportCreateInput.builder()
+                                    .userid(user.id)
+                                    .itemid(lost_itemid)
+                                    .itemname(lost_itemname)
+                                    .status(true)
+                                    .build())
+                            .build();
+
+                    getMyApollo()
+                            .mutate(create)
+                            .enqueue(
+                                    (new ApolloCall.Callback<CreateLostReportMutation.Data>() {
+                                        @Override
+                                        public void onResponse(@Nonnull Response<CreateLostReportMutation.Data> response) {
+                                            Log.i("mutation", response.toString());
+                                            if (response == null) {
+                                                runOnUiThread(new Runnable() {
+                                                    public void run() {
+                                                        Toast.makeText(context, "등록에 실패했습니다.", Toast.LENGTH_LONG).show();
+                                                    }
+                                                });
+                                            }
+                                            else
+                                            runOnUiThread(new Runnable() {
+                                                public void run() {
+                                                    lost_itemid = "";
+                                                    lost_itemname = "";
+                                                    Toast.makeText(context, "등록에 성공했습니다.", Toast.LENGTH_LONG).show();
+                                                }
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onFailure(@Nonnull ApolloException e) {
+                                            Log.e("mutation", e.getMessage(), e);
+                                        }
+                                    }));
+                }
+                else {
+                    Toast.makeText(context, "item을 선택해주세요.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+    }
+    public void acquisitionListUp(Response<LostReportsQuery.Data> dataResponse){
+        ArrayList<String> arr_acquisitionList = new ArrayList<>();
+        final Map<String, String> acquisition_set = new HashMap<String,String>();
+
+
+        for(LostReportsQuery.LostReport object : dataResponse.data().lostReports()) {
+            acquisition_set.put(object.itemname , object.itemid + "&" + object.userid);
+        }
+
+
+        arr_acquisitionList.addAll(acquisition_set.keySet());
+        ListView acquisition_listView = (ListView) nfc_acquisition_report.findViewById(R.id.acquisition_list);
+        acquisition_listView.setAdapter(new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, arr_acquisitionList));
+
+        acquisition_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                acquisition_itemid = acquisition_set.get(((TextView) view).getText().toString());
+                acquisition_itemname = ((TextView) view).getText().toString();
+                Toast.makeText(context, ((TextView) view).getText().toString() + " : Selected", Toast.LENGTH_LONG).show();
+            }
+        });
+
+    }
+    public void acquisitionSet() {
+        Button acquisition_item_submit = (Button) nfc_acquisition_report.findViewById(R.id.button_complete);
+        acquisition_item_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                 String str = user.id + "&" + acquisition_itemid.split("&")[1] + "&" + acquisition_itemid.split("&")[0] + "&" + acquisition_itemname;
+                 map.put(str, "");
+                 reference.updateChildren(map);
+                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                 intent.putExtra("room_name", str);
+                 intent.putExtra("user_name", user.id+"/"+user.name);
+                 intent.putExtra("item_user", str.split("&")[1]);
+                 startActivity(intent);
+            }
+        });
+        getMyApollo().query(LostReportsQuery.builder().build())
+                .enqueue(new ApolloCall.Callback<LostReportsQuery.Data>() {
+                    @Override public void onResponse(final  @Nonnull Response<LostReportsQuery.Data> dataResponse) {
+
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                acquisitionListUp(dataResponse);
+                            }
+                        });
+                    }
+                    @Override
+                    public void onFailure(@Nonnull ApolloException e) {
+
+                    }
+                });
+
+
+
+
+
+
     }
 
 
@@ -632,10 +793,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 @Override
                                 public void onResponse(@Nonnull Response<UserQuery.Data> response) {
                                     user = response.data().user();
+
                                     ItemListUp(user.id);
                                     nfcRegSet();        // nfc_registration 안에 뷰페이저 및 기본 설정
                                     nfcReadSet();       // nfc_read 설정
                                     nfcMessageSet();    // nfc_message 설정
+                                    projectReady = true;
                                 }
 
                                 @Override
@@ -686,14 +849,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profileSet();
         getUserInfo();      // 로그인시 넘어오는 Intent에서 로그인 정보 조회
         nfcSet();           // nfc 설정
+        lostSet();
+        acquisitionSet();
 
     }
     public void ItemListUp(final String id){
         runOnUiThread(new Runnable() {
             public void run() {
                 try {
+                    //관리자
+//                    navigationView.getMenu().getItem(4).setVisible(false);
+//                    navigationView.getMenu().getItem(3).setVisible(true);
+//                    if(user.userid.equals("admin")){
+//                        navigationView.getMenu().getItem(4).setVisible(true);
+//                        navigationView.getMenu().getItem(3).setVisible(false);
+//                    }
                     userNameText.setText(user.name);
                     profile_userNameText.setText(user.name);
+
                     final ProgressDialog progressDialog;
                     progressDialog= new ProgressDialog(MainActivity.this);
                     progressDialog.setMessage("Please wait...");

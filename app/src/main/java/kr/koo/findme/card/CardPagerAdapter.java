@@ -20,7 +20,7 @@ import kr.koo.findme.lib.MyBitmap;
 public class CardPagerAdapter extends PagerAdapter implements CardAdapter {
 
     private List<CardView> mViews;
-    private List<CardItem> mData;
+    public List<CardItem> mData;
     private float mBaseElevation;
 
     public CardPagerAdapter() {

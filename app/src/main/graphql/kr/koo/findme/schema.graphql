@@ -13,6 +13,29 @@ query Users{
     }
 }
 
+query  LostReports {
+    lostReports {
+        id
+        userid
+        itemname
+        itemid
+        status
+    }
+}
+
+query Ac{
+    users {
+        id
+        userid
+        password
+        name
+        phonenumber
+        birthday
+        address
+        token
+    }
+}
+
 query Items($where : ItemWhereInput!){
     items(where : $where) {
         id
@@ -53,6 +76,12 @@ mutation createItem($data: ItemCreateInput!) {
 
 mutation createUser($data: UserCreateInput!) {
     createUser(data: $data) {
+        id
+    }
+}
+
+mutation createLostReport($data: LostReportCreateInput!){
+    createLostReport(data : $data){
         id
     }
 }
