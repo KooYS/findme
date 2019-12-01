@@ -657,7 +657,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String room_name = set.get(((TextView) view).getText().toString());
                 intent.putExtra("room_name", room_name);
                 intent.putExtra("user_name", user.id+"/"+user.name);
-                intent.putExtra("item_user", room_name.split("&")[1]);
+                if(((TextView) view).getText().toString().contains("내가쓴글/")){
+                    intent.putExtra("item_user", room_name.split("&")[1]);
+                }
+                else
+                    intent.putExtra("item_user", room_name.split("&")[0]);
                 startActivity(intent);
             }
         });
@@ -906,6 +910,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+
+
+
+
     public void NewData(final  String res, final String itemName, final  String itempasswd){
         runOnUiThread(new Runnable() {
             public void run() {
