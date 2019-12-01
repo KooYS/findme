@@ -35,7 +35,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:onClick="addItem"
             android:background="@drawable/gradient_button"
             android:text="ADD ITEM"
             android:textColor="@android:color/white"

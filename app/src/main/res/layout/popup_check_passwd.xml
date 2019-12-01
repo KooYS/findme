@@ -17,7 +17,7 @@
                 android:layout_marginBottom="20dp"
                 android:gravity="center"
                 android:textColor="#4B0082"
-                android:text="PASSWORD" />
+                android:text="NFC PASSWORD" />
 
         </TableRow>
 

@@ -15,9 +15,9 @@
         <item
             android:id="@+id/nav_nfc_read"
             android:title="@string/menu_nfc_read" />
-        <item
-            android:id="@+id/nav_registered_list"
-            android:title="@string/menu_registered_list" />
+<!--        <item-->
+<!--            android:id="@+id/nav_registered_list"-->
+<!--            android:title="@string/menu_registered_list" />-->
         <item
             android:id="@+id/nav_loss_report"
             android:title="@string/menu_loss_report" />

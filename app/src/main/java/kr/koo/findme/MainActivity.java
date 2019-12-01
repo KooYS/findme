@@ -46,6 +46,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -105,7 +106,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView readUserInfo;
     TextView userNameText;
     ImageView readImage;
-
+    String currentItemPwd = "";
+    NavigationView navigationView;
+    //profile layout
+    TextView profile_userNameText;
 
     TextView message;
     Button btnWrite;
@@ -135,7 +139,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-
+    boolean doubleBackToExitPressedOnce = false;
+    String currentStateforBackKey = "";
     private ImageView imgPreview;
     private  static ApolloClient myApollo;
     public UserQuery.User user;
@@ -190,6 +195,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        nfc_profile.setVisibility(View.GONE);
+        nfc_registration.setVisibility(View.GONE);
+        nfc_read.setVisibility(View.GONE);
+        nfc_message.setVisibility(View.GONE);
+        nfc_home.setVisibility(View.GONE);
+        nfc_acquisition_report.setVisibility(View.GONE);
+        nfc_lost_report.setVisibility(View.GONE);
+
+
+        if(currentStateforBackKey.equals("profile")){
+            navigationView.getMenu().getItem(0).setChecked(true);
+            nfc_profile.setVisibility(View.VISIBLE);
+            currentStateforBackKey = "main";
+            return;
+        }
+        else if(currentStateforBackKey.equals("main")){
+            navigationView.getMenu().getItem(0).setChecked(false);
+            navigationView.getMenu().getItem(1).setChecked(false);
+            navigationView.getMenu().getItem(2).setChecked(false);
+            navigationView.getMenu().getItem(3).setChecked(false);
+            navigationView.getMenu().getItem(4).setChecked(false);
+            navigationView.getMenu().getItem(5).setChecked(false);
+            nfc_home.setVisibility(View.VISIBLE);
+            currentStateforBackKey = "";
+            return;
+        }
+        else if(currentStateforBackKey.equals("")){
+            nfc_home.setVisibility(View.VISIBLE);
+            currentStateforBackKey = "";
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
+    }
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -211,10 +266,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         nfc_home.setVisibility(View.GONE);
         nfc_acquisition_report.setVisibility(View.GONE);
         nfc_lost_report.setVisibility(View.GONE);
+        currentStateforBackKey = "main";
 
 
         Fragment fragment = null;
         String title = getString(R.string.app_name);
+
+        if(item.toString().equals("LOGOUT")){
+            finish();
+        }
 
         if (id == R.id.nav_profile) {
             fragment = new ProfileFragment();
@@ -232,9 +292,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fragment = new ReadFragment();
             title = "NFC READ";
             nfc_read.setVisibility(View.VISIBLE);
-        } else if (id == R.id.nav_registered_list) {
-            fragment = new RegListFragment();
-            title = "REGISTERED LIST";
+//        } else if (id == R.id.nav_registered_list) {
+//            fragment = new RegListFragment();
+//            title = "REGISTERED LIST";
         } else if (id == R.id.nav_loss_report) {
             fragment = new LossFragment();
             title = "THE LOSS REPORT";
@@ -283,11 +343,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);                 // 위 상단 툴바
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);                       // 네비게이션 바
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view); // 네비게이션 바
+        navigationView = (NavigationView) findViewById(R.id.nav_view); // 네비게이션 바
         navigationView.setNavigationItemSelectedListener(this);                       // 네비게이션 바
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(                       // 네비게이션 바 버튼 구성
-                R.id.nav_nfc_registration, R.id.nav_nfc_read, R.id.nav_registered_list,
+                R.id.nav_nfc_registration, R.id.nav_nfc_read,
                 R.id.nav_loss_report, R.id.nav_acquisition_report, R.id.nav_message)
                 .setDrawerLayout(drawer)
                 .build();
@@ -295,6 +355,100 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View headerLayout = navigationView.inflateHeaderView(R.layout.nav_header_main2);
         userNameText = headerLayout.findViewById(R.id.usernameText);                    // 네비게이션 바 사용자이름
     }
+
+    public void profileSet(){
+        ConstraintLayout profileView = (ConstraintLayout) findViewById(R.id.nfc_profile); // 네비게이션 바
+        profile_userNameText = ((TextView) profileView.findViewById(R.id.username));                    // 네비게이션 바 사용자이름
+
+    }
+
+    public void onClickMenu(View view) {
+
+
+        int id = view.getId();
+
+        currentStateforBackKey = "profile";
+        nfc_profile.setVisibility(View.GONE);
+        nfc_registration.setVisibility(View.GONE);
+        nfc_read.setVisibility(View.GONE);
+        nfc_message.setVisibility(View.GONE);
+        nfc_home.setVisibility(View.GONE);
+        nfc_acquisition_report.setVisibility(View.GONE);
+        nfc_lost_report.setVisibility(View.GONE);
+
+
+        Fragment fragment = null;
+        String title = getString(R.string.app_name);
+
+        if (id == R.id.profile_registered_btn) {
+            navigationView.getMenu().getItem(1).setChecked(true);
+            // Handle the camera action
+            fragment = new RegistrationFragment();
+            title = "NFC Registration";
+            nfc_registration.setVisibility(View.VISIBLE);
+        }
+        else if (id == R.id.profile_logout_btn) {
+            finish();
+        } else if (id == R.id.profile_loss_btn) {
+            navigationView.getMenu().getItem(3).setChecked(true);
+            fragment = new LossFragment();
+            title = "THE LOSS REPORT";
+            nfc_lost_report.setVisibility(View.VISIBLE);
+        } else if (id == R.id.profile_acquisition_btn) {
+            navigationView.getMenu().getItem(4).setChecked(true);
+            fragment = new AcquisitionFragment();
+            title = "THE ACQUISITION REPORT";
+            nfc_acquisition_report.setVisibility(View.VISIBLE);
+
+        } else if (id == R.id.profile_message_btn) {
+            navigationView.getMenu().getItem(5).setChecked(true);
+            fragment = new MessageFragment();
+            title = "MESSAGE";
+            nfc_message.setVisibility(View.VISIBLE);
+        }
+        if (fragment != null) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.nav_host_fragment, fragment);
+            ft.commit();
+
+            // set the toolbar title
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(title);
+            }
+
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+
+        }
+
+
+//        nfc_profile.setVisibility(View.GONE);
+//        nfc_registration.setVisibility(View.GONE);
+//        nfc_read.setVisibility(View.GONE);
+//        nfc_message.setVisibility(View.GONE);
+//        nfc_home.setVisibility(View.GONE);
+//        nfc_acquisition_report.setVisibility(View.GONE);
+//        nfc_lost_report.setVisibility(View.GONE);
+//
+//
+//        if(view.getId() == R.id.profile_acquisition_btn){
+//            nfc_acquisition_report.setVisibility(View.VISIBLE);
+//        }else if(view.getId() == R.id.profile_loss_btn){
+//            nfc_lost_report.setVisibility(View.VISIBLE);
+//        }
+//        else if(view.getId() == R.id.profile_logout_btn){
+//            finish();
+//        }
+//        else if(view.getId() == R.id.profile_message_btn){
+//            nfc_message.setVisibility(View.VISIBLE);
+//        }
+//        else if(view.getId() == R.id.profile_registered_btn){
+//            nfc_registration.setVisibility(View.VISIBLE);
+//        }
+
+    }
+
+
     public void nfcMessageSet(){
         listView = (ListView) findViewById(R.id.list);
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_roomList);
@@ -438,8 +592,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                         }});
                                                 }
                                                 final String res = response.data().createItem().id();
-                                                NewData(res,itemName);
-
+                                                NewData(res,itemName,itemPasswd);
                                                 dialog.cancel();
                                                 alertDialog.cancel();
                                             }
@@ -530,7 +683,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         xmlSet();           //xml 설정
         navigationSet();    // navigation 설정
-
+        profileSet();
         getUserInfo();      // 로그인시 넘어오는 Intent에서 로그인 정보 조회
         nfcSet();           // nfc 설정
 
@@ -540,6 +693,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void run() {
                 try {
                     userNameText.setText(user.name);
+                    profile_userNameText.setText(user.name);
                     final ProgressDialog progressDialog;
                     progressDialog= new ProgressDialog(MainActivity.this);
                     progressDialog.setMessage("Please wait...");
@@ -579,7 +733,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
-    public void NewData(final  String res, final String itemName){
+    public void NewData(final  String res, final String itemName, final  String itempasswd){
         runOnUiThread(new Runnable() {
             public void run() {
                 mCardAdapter.addCardItem(new CardItem(itemName, imgString,res,
@@ -589,9 +743,88 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     if(myTag ==null) {
                                         Toast.makeText(context, ERROR_DETECTED, Toast.LENGTH_LONG).show();
                                     } else {
-                                        //write(message.getText().toString(), myTag);
-                                        write("itemname="+ itemName + "&" + "id="+ res + "&userid="+ user.id , myTag);
-                                        Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+
+                                        if(currentItemPwd == ""){
+                                            write("itemname="+ itemName + "&" + "id="+ res + "&userid="+ user.id + "&itempasswd="+ itempasswd , myTag);
+                                            Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+                                        }
+                                        else {
+
+                                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                                            alertDialogBuilder.setCancelable(false);
+
+
+                                            LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+                                            View popupInputDialogView = layoutInflater.inflate(R.layout.popup_check_passwd, null);
+
+                                            final EditText itemPasswdEditText = (EditText) popupInputDialogView.findViewById(R.id.check_itemPasswd);
+                                            final Button saveButton = popupInputDialogView.findViewById(R.id.check_btn_add);
+
+                                            // Set the inflated layout view object to the AlertDialog builder.
+                                            alertDialogBuilder.setView(popupInputDialogView);
+
+                                            // Create AlertDialog and show.
+                                            alertDialog = alertDialogBuilder.create();
+                                            alertDialog.show();
+
+                                            saveButton.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(final View view) {
+                                                    final ProgressDialog dialog = ProgressDialog.show(view.getContext(), "",
+                                                            "Loading. Please wait...", true);
+
+                                                    final String itemPasswd = itemPasswdEditText.getText().toString();
+
+                                                    if (currentItemPwd.equals(itemPasswd)) {
+                                                        try {
+                                                            write("itemname="+ itemName + "&" + "id="+ res + "&userid="+ user.id + "&itempasswd="+ itempasswd , myTag);
+                                                            Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+                                                        } catch (IOException e) {
+                                                            e.printStackTrace();
+                                                        } catch (FormatException e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                        dialog.cancel();
+                                                        alertDialog.cancel();
+                                                    } else {
+                                                        new AlertDialog.Builder(context)
+                                                                .setTitle("error")
+                                                                .setMessage("Passwords wrong!")
+
+                                                                // Specifying a listener allows you to take an action before dismissing the dialog.
+                                                                // The dialog is automatically dismissed when a dialog button is clicked.
+                                                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                                                    public void onClick(DialogInterface dialog, int which) {
+                                                                        // Continue with delete operation
+                                                                    }
+                                                                })
+                                                                .setNegativeButton(android.R.string.no, null)
+                                                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                                                .show();
+
+                                                        dialog.cancel();
+                                                        alertDialog.cancel();
+                                                    }
+                                                }
+                                            });
+
+                                        }
+
+//                                        if(currentItemPwd != "")
+//                                        {
+//                                            if(currentItemPwd.equals(itempasswd)){
+//                                                write("itemname="+ itemName + "&" + "id="+ res + "&userid="+ user.id + "&itempasswd="+ itempasswd , myTag);
+//                                                Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+//                                            }
+//                                            else {
+//                                                Toast.makeText(context, "등록되어있는 패스워드와 다릅니다.", Toast.LENGTH_LONG).show();
+//                                            }
+//                                        }
+//                                        else {
+//                                            write("itemname=" + itemName + "&" + "id=" + res + "&userid=" + user.id + "&itempasswd=" + itempasswd, myTag);
+//                                            Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG).show();
+//                                        }
+
                                     }
                                 } catch (IOException e) {
                                     Toast.makeText(context, WRITE_ERROR, Toast.LENGTH_LONG ).show();
@@ -621,9 +854,89 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             if(myTag ==null) {
                                 Toast.makeText(context, ERROR_DETECTED, Toast.LENGTH_LONG).show();
                             } else {
+
+                                if(currentItemPwd == ""){
+                                    write("itemname="+ data.itemname + "&" + "id="+ data.id + "&userid="+ user.id + "&itempasswd="+ data.itempasswd , myTag);
+                                    Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+                                }
+                                else {
+
+                                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                                    alertDialogBuilder.setCancelable(false);
+
+
+                                    LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+                                    View popupInputDialogView = layoutInflater.inflate(R.layout.popup_check_passwd, null);
+
+                                    final EditText itemPasswdEditText = (EditText) popupInputDialogView.findViewById(R.id.check_itemPasswd);
+                                    final Button saveButton = popupInputDialogView.findViewById(R.id.check_btn_add);
+
+                                    // Set the inflated layout view object to the AlertDialog builder.
+                                    alertDialogBuilder.setView(popupInputDialogView);
+
+                                    // Create AlertDialog and show.
+                                    alertDialog = alertDialogBuilder.create();
+                                    alertDialog.show();
+
+                                    saveButton.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(final View view) {
+                                            final ProgressDialog dialog = ProgressDialog.show(view.getContext(), "",
+                                                    "Loading. Please wait...", true);
+
+                                            final String itemPasswd = itemPasswdEditText.getText().toString();
+
+                                            if (currentItemPwd.equals(itemPasswd)) {
+                                                try {
+                                                    write("itemname=" + data.itemname + "&" + "id=" + data.id + "&userid=" + user.id + "&itempasswd=" + data.itempasswd, myTag);
+                                                    Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG).show();
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                } catch (FormatException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                dialog.cancel();
+                                                alertDialog.cancel();
+                                            } else {
+                                                new AlertDialog.Builder(context)
+                                                        .setTitle("error")
+                                                        .setMessage("Passwords wrong!")
+
+                                                        // Specifying a listener allows you to take an action before dismissing the dialog.
+                                                        // The dialog is automatically dismissed when a dialog button is clicked.
+                                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                                            public void onClick(DialogInterface dialog, int which) {
+                                                                // Continue with delete operation
+                                                            }
+                                                        })
+                                                        .setNegativeButton(android.R.string.no, null)
+                                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                                        .show();
+
+                                                dialog.cancel();
+                                                alertDialog.cancel();
+                                            }
+                                        }
+                                    });
+
+                                }
                                 //write(message.getText().toString(), myTag);
-                                write("itemname="+ data.itemname + "&" + "id="+ data.id + "&userid="+ user.id + "&itempasswd="+ data.itempasswd , myTag);
-                                Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+//                                if(currentItemPwd != "")
+//                                {
+//                                    if(currentItemPwd.equals(data.itempasswd)){
+//                                        write("itemname="+ data.itemname + "&" + "id="+ data.id + "&userid="+ user.id + "&itempasswd="+ data.itempasswd , myTag);
+//                                        Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+//                                    }
+//                                    else {
+//                                        Toast.makeText(context, "등록되어있는 패스워드와 다릅니다.", Toast.LENGTH_LONG).show();
+//                                    }
+//                                }
+//                                else {
+//                                    write("itemname="+ data.itemname + "&" + "id="+ data.id + "&userid="+ user.id + "&itempasswd="+ data.itempasswd , myTag);
+//                                    Toast.makeText(context, WRITE_SUCCESS, Toast.LENGTH_LONG ).show();
+//                                }
+
+
                             }
                         } catch (IOException e) {
                             Toast.makeText(context, WRITE_ERROR, Toast.LENGTH_LONG ).show();
@@ -682,6 +995,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         final String[] split = text.split("&");
+        if(split.length == 4)
+            currentItemPwd = split[3].split("=")[1];
+        else
+            currentItemPwd = "";
 
         if(nfc_read.getVisibility() == View.VISIBLE)
         try {
@@ -701,32 +1018,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-                                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                                            alertDialogBuilder.setCancelable(false);
+////                                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+////                                            alertDialogBuilder.setCancelable(false);
+////
+////
+////                                            LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+////                                            View popupInputDialogView = layoutInflater.inflate(R.layout.popup_check_passwd, null);
+////
+////                                            final EditText itemPasswdEditText = (EditText) popupInputDialogView.findViewById(R.id.check_itemPasswd);
+////                                            final Button saveButton = popupInputDialogView.findViewById(R.id.check_btn_add);
+////
+////                                            // Set the inflated layout view object to the AlertDialog builder.
+////                                            alertDialogBuilder.setView(popupInputDialogView);
+////
+////                                            // Create AlertDialog and show.
+////                                            alertDialog = alertDialogBuilder.create();
+////                                            alertDialog.show();
+////
+////                                            saveButton.setOnClickListener(new View.OnClickListener() {
+////                                                @Override
+////                                                public void onClick(final View view) {
+//                                                    final ProgressDialog dialog = ProgressDialog.show(view.getContext(), "",
+//                                                            "Loading. Please wait...", true);
+//
+//                                                    final String itemPasswd = itemPasswdEditText.getText().toString();
 
-
-                                            LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
-                                            View popupInputDialogView = layoutInflater.inflate(R.layout.popup_check_passwd, null);
-
-                                            final EditText itemPasswdEditText = (EditText) popupInputDialogView.findViewById(R.id.check_itemPasswd);
-                                            final Button saveButton = popupInputDialogView.findViewById(R.id.check_btn_add);
-
-                                            // Set the inflated layout view object to the AlertDialog builder.
-                                            alertDialogBuilder.setView(popupInputDialogView);
-
-                                            // Create AlertDialog and show.
-                                            alertDialog = alertDialogBuilder.create();
-                                            alertDialog.show();
-
-                                            saveButton.setOnClickListener(new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(final View view) {
-                                                    final ProgressDialog dialog = ProgressDialog.show(view.getContext(), "",
-                                                            "Loading. Please wait...", true);
-
-                                                    final String itemPasswd = itemPasswdEditText.getText().toString();
-
-                                                    if(read_item.itempasswd.equals(itemPasswd)){
+//                                                    if(read_item.itempasswd.equals(itemPasswd)){
+                                                    if(true){
 
                                                         readItemName.setText("Item Name : " + split[0].split("=")[1]);
                                                         Bitmap myBitmapAgain = MyBitmap.decodeBase64(read_item.img);
@@ -766,32 +1084,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                                                         }
 
-                                                        dialog.cancel();
-                                                        alertDialog.cancel();
+//                                                        dialog.cancel();
+//                                                        alertDialog.cancel();
                                                     }
-                                                    else
-                                                    {
-                                                        new AlertDialog.Builder(context)
-                                                                .setTitle("error")
-                                                                .setMessage("패스워드가 일치하지않습니다.")
-
-                                                                // Specifying a listener allows you to take an action before dismissing the dialog.
-                                                                // The dialog is automatically dismissed when a dialog button is clicked.
-                                                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                                                    public void onClick(DialogInterface dialog, int which) {
-                                                                        // Continue with delete operation
-                                                                    }
-                                                                })
-                                                                .setNegativeButton(android.R.string.no, null)
-                                                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                                                .show();
-
-                                                        dialog.cancel();
-                                                        alertDialog.cancel();
-                                                    }
-
-                                                }
-                                            });
+//                                                    else
+//                                                    {
+//                                                        new AlertDialog.Builder(context)
+//                                                                .setTitle("error")
+//                                                                .setMessage("패스워드가 일치하지않습니다.")
+//
+//                                                                // Specifying a listener allows you to take an action before dismissing the dialog.
+//                                                                // The dialog is automatically dismissed when a dialog button is clicked.
+//                                                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//                                                                    public void onClick(DialogInterface dialog, int which) {
+//                                                                        // Continue with delete operation
+//                                                                    }
+//                                                                })
+//                                                                .setNegativeButton(android.R.string.no, null)
+//                                                                .setIcon(android.R.drawable.ic_dialog_alert)
+//                                                                .show();
+//
+//                                                        dialog.cancel();
+//                                                        alertDialog.cancel();
+//                                                    }
+//
+//                                                }
+//                                            });
 
 
 
@@ -910,9 +1228,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         nfcAdapter.disableForegroundDispatch(this);
     }
 
-    public void onClickMenu(View view) {
-        Toast.makeText(getApplicationContext(), "Test", Toast.LENGTH_SHORT).show();
-    }
+
 
 }
 

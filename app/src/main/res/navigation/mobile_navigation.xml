@@ -24,11 +24,11 @@
         tools:layout="@layout/fragment_read" />
 
 
-    <fragment
-        android:id="@+id/nav_registered_list"
-        android:name="kr.koo.findme.ui.list.RegListFragment"
-        android:label="@string/menu_registered_list"
-        tools:layout="@layout/fragment_list" />
+<!--    <fragment-->
+<!--        android:id="@+id/nav_registered_list"-->
+<!--        android:name="kr.koo.findme.ui.list.RegListFragment"-->
+<!--        android:label="@string/menu_registered_list"-->
+<!--        tools:layout="@layout/fragment_list" />-->
 
     <fragment
         android:id="@+id/nav_loss_report"
