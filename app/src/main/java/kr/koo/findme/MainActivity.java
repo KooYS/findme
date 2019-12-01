@@ -858,12 +858,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void run() {
                 try {
                     //관리자
-//                    navigationView.getMenu().getItem(4).setVisible(false);
-//                    navigationView.getMenu().getItem(3).setVisible(true);
-//                    if(user.userid.equals("admin")){
-//                        navigationView.getMenu().getItem(4).setVisible(true);
-//                        navigationView.getMenu().getItem(3).setVisible(false);
-//                    }
+                    navigationView.getMenu().getItem(4).setVisible(false);
+                    navigationView.getMenu().getItem(3).setVisible(true);
+                    if(user.userid.equals("admin")){
+                        navigationView.getMenu().getItem(4).setVisible(true);
+                        navigationView.getMenu().getItem(3).setVisible(false);
+                    }
                     userNameText.setText(user.name);
                     profile_userNameText.setText(user.name);
 
