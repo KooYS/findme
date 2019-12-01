@@ -125,9 +125,9 @@ public class ChatActivity extends AppCompatActivity {
             @Override public void onClick(View view) {
 
                 // map을 사용해 name과 메시지를 가져오고, key에 값 요청
-                Map<String, Object> map = new HashMap<String, Object>();
+//                Map<String, Object> map = new HashMap<String, Object>();
                 key = reference.push().getKey();
-                reference.updateChildren(map);
+//                reference.updateChildren(map);
 
                 DatabaseReference root = reference.child(key);
 
